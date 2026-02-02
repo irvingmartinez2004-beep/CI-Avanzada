@@ -4,8 +4,6 @@ import ec.edu.espe.buildtestci.dto.WalletResponse;
 import ec.edu.espe.buildtestci.model.Wallet;
 import ec.edu.espe.buildtestci.repository.WalletRepository;
 
-import java.util.Optional;
-
 public class WalletService {
 
     private final WalletRepository walletRepository;
@@ -41,19 +39,39 @@ public class WalletService {
         return new WalletResponse(saved.getId(), saved.getBalance());
     }
 
-    //Depositar dinero
+    // Depositar dinero
     public double deposit(String walletId, double amount) {
-        if (amount<0) {
-            throw new IllegalArgumentException("Invalid amount");
-        }
-        Optional<Wallet> found = walletRepository.findById(walletId);
-        if(found.isEmpty()) {
-            throw new IllegalStateException("Wallet not found");
-        }
-        Wallet wallet = found.get();
-        wallet.deposit(amount);
 
-        //DPersistimos  el nuevo saldo
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new IllegalStateException("Wallet not found"));
+
+        wallet.deposit(amount);
+        walletRepository.save(wallet);
+
+        return wallet.getBalance();
+    }
+
+    // Retiro de dinero
+    public double withdraw(String walletId, double amount) {
+
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new IllegalStateException("Wallet not found"));
+
+        if (wallet.getBalance() < amount) {
+            throw new IllegalStateException("Insufficient Balance");
+        }
+
+        wallet.withdraw(amount);
+        walletRepository.save(wallet);
+
         return wallet.getBalance();
     }
 }
