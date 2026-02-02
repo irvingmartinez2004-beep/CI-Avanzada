@@ -1,27 +1,30 @@
-name: CI
+name: CI Build and Test
 
 on:
   push:
-    brnaches:
+    branches:
       - main
   pull_request:
 
-  jobs:
-    build-test:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Clonar el repsoitorio
-          uses: actions/checkout@v4
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
 
-        - name: Configurar Java
-          uses: actions/setup-jave@v4
-          with:
-            distribution: 'temurin'
-            jave-version: '17'
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v4
 
-        - name: Ejecutar pruebas
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-          run: ./gradlew test
+      - name: Dar permisos a Gradle Wrapper
+        run: chmod +x gradlew
 
-        - name: Construir
-          run: ./gradlw build
+      - name: Ejecutar pruebas
+        run: ./gradlew test
+
+      - name: Construir proyecto
+        run: ./gradlew build
